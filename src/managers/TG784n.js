@@ -1,7 +1,7 @@
 import path           from "path";
 import Timer          from "timers";
 import { Telnet }     from "telnet-rxjs";
-import DeviceManager  from "../DeviceManager";
+import DeviceManager  from "DeviceManager";
 
 /*
  * Device manager 'Technicolor TG784n v3'

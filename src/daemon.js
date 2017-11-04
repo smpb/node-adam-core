@@ -1,5 +1,5 @@
 import express from "express";
-import Config  from "./Config";
+import Config  from "Config";
 
 /*
  * A. D. A. M. - Automations, Devices, and Alerts, Manager

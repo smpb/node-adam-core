@@ -1,5 +1,5 @@
 import Winston from "winston";
-import TG784n  from "./managers/TG784n";
+import TG784n  from "managers/TG784n";
 
 
 // Enviroment specific settings

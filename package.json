@@ -23,7 +23,7 @@
         "validate": "eslint src/*.js",
         "transpile": "rm -rf dist && mkdir dist && babel src -d dist",
         "build": "yarn validate && yarn transpile",
-        "start": "node dist/daemon.js"
+        "start": "NODE_PATH=dist node dist/daemon.js"
     },
     "engines": {
         "node": ">=4.0.0"
