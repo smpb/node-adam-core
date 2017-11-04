@@ -7,6 +7,7 @@ import Config  from "./Config";
  */
 
 let deviceManager = Config.deviceManager;
+let logger = Config.logger;
 let adam = express();
 
 
@@ -16,7 +17,10 @@ adam.get("/", function (req, res) {
 });
 
 adam.get("/devices", function (req, res) {
-    deviceManager.getActiveDevices( (devices) => { res.json( devices ); } );
+    deviceManager.getActiveDevices( (error, devices) => {
+        if (error) { logger.error(`${error}`); }
+        res.json( devices );
+    });
 });
 
 adam.listen( Config.port );

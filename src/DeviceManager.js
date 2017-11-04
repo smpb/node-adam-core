@@ -9,8 +9,8 @@
  *
  *    getActiveDevices
  *      @param {function} a callback function that will be called once retrieval is done.
- *      @returns {object} the active data that will be passed as an argument to the callback;
- *                        it is expected to be in the format of the following example:
+ *      @returns {object} data that will be passed as the second argument (the first being possible errors)
+ *                        to the callback; it is expected to be in the format of the following example:
  *
  *          {
  *              timestamp : 1509740200000,

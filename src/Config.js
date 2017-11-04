@@ -42,8 +42,14 @@ let technicolor = new TG784n({
     comand: "hostmgr list"
 });
 
-// resilience to "unexpected" interruptions
-process.on("uncaughtException", () => {});
+// unsafe resilience to "unexpected" interruptions
+process
+    .on("unhandledRejection", (reason, p) => {
+        winston.error(reason, " : unhandled rejection at Promise ", p);
+    })
+    .on("uncaughtException", (err) => {
+        winston.error(err, " : uncaught exception thrown.");
+    });
 
 // Configuration object
 const config = {

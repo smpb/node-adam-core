@@ -18,9 +18,8 @@ export default class TG784n extends DeviceManager {
         this.client.subscribe(
             () => {},
             (error) => {
-                this.options.logger.error(`'${this.name}' an error has occurred: ${error}`);
                 this.clientExit();
-                this.client.callback( {} );
+                return this.client.callback( error, {} );
             }
         );
 
@@ -63,7 +62,7 @@ export default class TG784n extends DeviceManager {
                     });
 
                     this.info = parsedInfo;
-                    this.client.callback( this.info );
+                    return this.client.callback( null, this.info );
                 }
             } else if ( this.client.communicating ) {
                 this.options.logger.debug(`'${this.name}' received some data`);
