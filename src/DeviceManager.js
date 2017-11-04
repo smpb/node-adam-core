@@ -1,3 +1,4 @@
+import path from "path";
 
 /*
  * Abstract class representing the manager that scans, and keeps track,
@@ -41,6 +42,10 @@ export default class DeviceManager {
             throw new TypeError("Derived class must override method 'getActiveDevices'");
 
         this.options = options;
+        this._module = options._module || path.basename(__filename, ".js");
         this.info    = { timestamp : 0, devices : [] };
     }
+
+    // methods
+    get moduleName() { return this._module; }
 }
