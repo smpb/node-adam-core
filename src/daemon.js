@@ -12,11 +12,11 @@ let adam = express();
 
 
 // routes
-adam.get("/", function (req, res) {
+adam.get("/", (req, res) => {
     res.send("A.D.A.M. : STATUS online");
 });
 
-adam.get("/devices", function (req, res) {
+adam.get("/devices", (req, res) => {
     deviceManager.getActiveDevices( (error, devices) => {
         if (error) { logger.error(`${error}`); }
         res.json( devices );

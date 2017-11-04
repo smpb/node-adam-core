@@ -19,8 +19,8 @@ let winston = new Winston.Logger({
     level: env[key].logLevel,
     transports: [
         new (Winston.transports.Console)({
-            timestamp: function() { let d = new Date(); return d.toISOString(); },
-            formatter: function(options) {
+            timestamp: () => { let d = new Date(); return d.toISOString(); },
+            formatter: (options) => {
                 return `[${options.timestamp()}] ${options.level.toUpperCase()} : ${(options.message ? options.message : "")}`;
             }
         })

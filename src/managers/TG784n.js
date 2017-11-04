@@ -48,7 +48,7 @@ export default class TG784n extends DeviceManager {
 
                     let parsedInfo = { timestamp : Date.now(), devices : [] };
 
-                    this.client.buffer.split("\n").forEach(function (row) {
+                    this.client.buffer.split("\n").forEach((row) => {
                         if (row.match(/[:a-f0-9]{17}/i)) {
                             let column = row.split(/\s+/);
                             if ( column[2].match(/^[CD]+L$/) ) {
@@ -70,9 +70,9 @@ export default class TG784n extends DeviceManager {
             }
         });
 
-        // helper function
+        // clean exit helper
         this.clientExit = () => {
-            let Timeout = Timer.setTimeout(function(){}, 0).constructor; // feed the next 'instanceof'
+            let Timeout = Timer.setTimeout(() => {}, 0).constructor; // feed the next 'instanceof'
             if (this.client.timer instanceof Timeout) { Timer.clearTimeout( this.client.timer ); }
             this.client.disconnect();
         }
