@@ -1,0 +1,48 @@
+{
+    "name": "node-adam-core",
+    "version": "0.0.1",
+    "description": "A.D.A.M. - Automations, Devices, and Alerts, Manager",
+    "homepage": "https://github.com/smpb/node-adam-core",
+    "author": {
+        "name": "Sérgio Bernardino",
+        "url": "https://sergiobernardino.net/"
+    },
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/smpb/node-adam-core"
+    },
+    "bugs": {
+        "url": "https://github.com/smpb/node-adam-core/issues"
+    },
+    "keywords": [
+        "automation",
+        "home assistant"
+    ],
+    "scripts": {
+        "clean": "rm -rf dist && rm -rf node_modules",
+        "validate": "eslint src/*.js",
+        "transpile": "rm -rf dist && mkdir dist && babel src -d dist",
+        "build": "yarn validate && yarn transpile",
+        "start": "node dist/daemon.js"
+    },
+    "engines": {
+        "node": ">=4.0.0"
+    },
+    "os": [
+        "darwin",
+        "linux"
+    ],
+    "dependencies": {
+        "lowdb": "^1.0.0",
+        "winston": "^2.4.0",
+        "express": "^4.16.2",
+        "telnet-rxjs": "^2.0.3"
+    },
+    "devDependencies": {
+        "eslint": "^4.1.0",
+        "babel-cli": "^6.0.0",
+        "babel-preset-env": "^1.6.1"
+    },
+    "readmeFilename": "README.md",
+    "license": "MIT"
+}
