@@ -1,7 +1,6 @@
 # A.D.A.M.
 
-[![license](https://img.shields.io/github/license/mashape/apistatus.svg)](https://opensource.org/licenses/MIT)
-
+![node version](https://img.shields.io/badge/node-%3E%3D4.0.0-green.svg) [![GitHub license](https://img.shields.io/github/license/smpb/node-adam-core.svg)](https://github.com/smpb/node-adam-core/blob/master/LICENSE)
 > Automations, Devices, and Alerts, Manager
 
 ## Quick Start
