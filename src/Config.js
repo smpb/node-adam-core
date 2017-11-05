@@ -1,18 +1,32 @@
-import Winston from "winston";
-import TG784n  from "managers/TG784n";
+import lowDB     from "lowdb";
+import FileSync  from "lowdb/adapters/FileSync";
+import Winston   from "winston";
+import TG784n    from "managers/TG784n";
 
 
 // Enviroment specific settings
 let env = {
     development: {
-        logLevel: "debug"
+        logLevel: "debug",
+        database: "adam-dev.json"
     },
     production: {
-        logLevel: "info"
+        logLevel: "info",
+        database: "adam.json"
     }
 };
 let key = process.env.NODE_ENV || "development";
 
+
+// Database
+let db = lowDB( new FileSync(env[key].database) );
+
+db.defaults({
+    active:  [],
+    people:  [],
+    devices: [],
+    timestamp: 0
+}).write();
 
 // Logger
 let winston = new Winston.Logger({
@@ -42,7 +56,8 @@ let technicolor = new TG784n({
     comand: "hostmgr list"
 });
 
-// unsafe resilience to "unexpected" interruptions
+
+// Unsafe resilience to "unexpected" interruptions
 process
     .on("unhandledRejection", (reason, p) => {
         winston.error(reason, " : unhandled rejection at Promise ", p);
@@ -51,10 +66,12 @@ process
         winston.error(err, " : uncaught exception thrown.");
     });
 
+
 // Configuration object
 const config = {
     port: 8080,
     logger: winston,
+    database: db,
     deviceManager: technicolor
 };
 export default config;
