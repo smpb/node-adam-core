@@ -25,13 +25,13 @@ export default class TG784n extends DeviceManager {
 
         this.client.data.subscribe((data) => {
             if (data.match(options.loginPrompt)) {
-                this.options.logger.debug(`[${this.moduleName}] Received login prompt`);
+                this.options.logger.silly(`[${this.moduleName}] Received login prompt`);
                 this.client.sendln( options.username );
             } else if (data.match(options.passwordPrompt)) {
-                this.options.logger.debug(`[${this.moduleName}] Received password prompt`);
+                this.options.logger.silly(`[${this.moduleName}] Received password prompt`);
                 this.client.sendln( options.password );
             } else if (data.match(options.shellPrompt)) {
-                this.options.logger.debug(`[${this.moduleName}] Received the shell prompt`);
+                this.options.logger.silly(`[${this.moduleName}] Received the shell prompt`);
                 if ( this.client.communicating ) {
                     this.client.buffer = this.client.buffer.concat(data);
                     this.client.communicating = false;
@@ -42,7 +42,7 @@ export default class TG784n extends DeviceManager {
                 }
 
                 if ((this.client.buffer !== "") && (! this.client.communicating)) {
-                    this.options.logger.debug(`[${this.moduleName}] Device info collected`);
+                    this.options.logger.debug(`[${this.moduleName}] Active network devices collection complete.`);
                     this.options.logger.silly(`[${this.moduleName}] ${this.client.buffer}`);
                     this.clientExit();
 
@@ -65,7 +65,7 @@ export default class TG784n extends DeviceManager {
                     return this.client.callback( null, this.info );
                 }
             } else if ( this.client.communicating ) {
-                this.options.logger.debug(`[${this.moduleName}] Received some data`);
+                this.options.logger.silly(`[${this.moduleName}] Received some data`);
                 this.client.buffer = this.client.buffer.concat(data);
             }
         });
