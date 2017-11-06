@@ -1,14 +1,18 @@
-import path   from "path";
-import Timer  from "timers";
-import Config from "Config";
+import path         from "path";
+import Timer        from "timers";
+import EventEmitter from "events";
+import Config       from "Config";
+
 
 /*
  * Worker class for generic out-of-band concurrent operations.
  *
  */
 
-export default class Worker {
+export default class Worker extends EventEmitter {
     constructor (options={}) {
+        super();
+
         this.state = Object.assign({
             name : "anonymous",
             heart: {},

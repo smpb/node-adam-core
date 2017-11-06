@@ -19,49 +19,55 @@ database.set("bootTime", Date.now()).write();
 
 
 // workers
-let wName = "DevicesWorker";
 let devicesWorker = new Worker({
-    name: wName,
+    name: "DevicesWorker",
     heartbeat: Config.heartbeat,
     action: () => {
         manager.getActiveDevices( (error, data) => {
-            if (error) { logger.error(`[${wName}] ${error}`); }
+            if (error) { devicesWorker.emit("error", error); }
             else {
-                let nActive = [];
-
                 database.get("active").value().forEach(device => {
-                    if ( data.devices.find((d) => { return device.mac === d.mac; }) ) {
-                        nActive.push(device);
-                    } else {
+                    if (! data.devices.find((d) => { return device.mac === d.mac; }) ) {
                         let absentDevice = database.get("devices").find({mac : device.mac}).value();
-                        logger.info(`[${wName}] Device [${absentDevice.mac} / ${absentDevice.name}] has LEFT the network.`);
+                        devicesWorker.emit("deviceDisconnected", { device : absentDevice, timestamp : data.timestamp });
                     }
                 });
 
                 data.devices.forEach(device => {
                     let known = database.get("devices").find({mac : device.mac}).value();
-                    device.lastSeen = data.timestamp;
 
                     if (! known) {
-                        database.get("devices").push(device).write();
+                        devicesWorker.emit("newDevice", { device : device, timestamp : data.timestamp });
                     } else {
-                        database.get("devices").find({ mac : device.mac }).assign({ lastSeen: data.timestamp }).write();
+                        devicesWorker.emit("deviceHeartbeat", { device : device, timestamp : data.timestamp });
                     }
 
-                    if (! (nActive.find( (d) => { return device.mac === d.mac; } )) ) {
-                        nActive.push({ mac : device.mac, joinTime : data.timestamp });
-                        logger.info(`[${wName}] Device [${device.mac} / ${device.name}] has JOINED the network.`);
+                    if (! database.get("active").find({ mac : device.mac}).value() ) {
+                        devicesWorker.emit("deviceConnected", { device : device, timestamp : data.timestamp });
                     }
-
-                    let debugMessage = `[${wName}] Device [${device.mac} / ${device.name}] has IP '${device.ip}'`;
-                    debugMessage = debugMessage + (known ? "." : " and I'm seeing it for the first time!");
-                    logger.debug( debugMessage );
                 });
-
-                database.set("active", nActive).write();
             }
         });
     }
+});
+devicesWorker.on("error", (error) => { logger.error(`[${devicesWorker.moduleName}] ${error}`); });
+
+devicesWorker.on("newDevice", (data) => {
+    logger.info(`[${devicesWorker.moduleName}] Device [${data.device.mac} / ${data.device.name}] is NEW.`);
+    data.device.lastSeen = data.timestamp;
+    database.get("devices").push(data.device).write();
+});
+devicesWorker.on("deviceHeartbeat", (data) => {
+    logger.debug(`[${devicesWorker.moduleName}] Device [${data.device.mac} / ${data.device.name}] has IP '${data.device.ip}'.`);
+    database.get("devices").find({ mac : data.device.mac }).assign({ lastSeen: data.timestamp }).write();
+});
+devicesWorker.on("deviceConnected", (data) => {
+    logger.info(`[${devicesWorker.moduleName}] Device [${data.device.mac} / ${data.device.name}] has JOINED the network.`);
+    database.get("active").push({ mac : data.device.mac, joinTime : data.timestamp }).write();
+});
+devicesWorker.on("deviceDisconnected", (data) => {
+    logger.info(`[${devicesWorker.moduleName}] Device [${data.device.mac} / ${data.device.name}] has LEFT the network.`);
+    database.get("active").remove({mac : data.device.mac}).write();
 });
 devicesWorker.start();
 
