@@ -63,16 +63,6 @@ env.development.manager = demoManager;
 env.production.manager  = technicolor;
 
 
-// Unsafe resilience to "unexpected" interruptions
-process
-    .on("unhandledRejection", (reason, p) => {
-        winston.error(reason, " : unhandled rejection at Promise ", p);
-    })
-    .on("uncaughtException", (err) => {
-        winston.error(err, " : uncaught exception thrown.");
-    });
-
-
 // Configuration object
 const config = {
     port: 8080,
