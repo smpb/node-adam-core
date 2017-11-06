@@ -19,10 +19,10 @@
         "home assistant"
     ],
     "scripts": {
-        "clean": "rm -rf dist && rm -rf node_modules",
+        "clean": "rm -rf dist database node_modules",
         "validate": "eslint src/*.js",
         "transpile": "rm -rf dist && mkdir dist && babel src -d dist",
-        "build": "eslint src/*.js && rm -rf dist && mkdir dist && babel src -d dist",
+        "build": "eslint src/*.js && rm -rf dist && mkdir -p dist database && babel src -d dist",
         "start": "NODE_PATH=dist node dist/daemon.js"
     },
     "engines": {

@@ -10,12 +10,12 @@ let env = {
     development: {
         logLevel: "debug",
         heartbeat: 10000,
-        database: "adam-dev.json"
+        database: "database/adam-dev.json"
     },
     production: {
         logLevel: "info",
         heartbeat: 60000,
-        database: "adam.json"
+        database: "database/adam.json"
     }
 };
 let key = process.env.NODE_ENV || "development";
