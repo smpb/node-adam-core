@@ -6,7 +6,7 @@
 
 ## Quick Start
 
-Using `[npm](https://www.npmjs.com/)`:
+Using [npm](https://www.npmjs.com/):
 
 ```sh
 npm install
@@ -14,7 +14,7 @@ npm run build
 npm run start
 ```
 
-Using `[yarn](https://yarnpkg.com/)`:
+Using [yarn](https://yarnpkg.com/):
 
 ```sh
 yarn
