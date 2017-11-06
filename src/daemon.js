@@ -19,7 +19,7 @@ database.set("timestamp", Date.now()).write();
 
 
 // workers
-let wName = "devices-worker";
+let wName = "DevicesWorker";
 let devicesWorker = new Worker({
     name: wName,
     heartbeat: Config.heartbeat,
