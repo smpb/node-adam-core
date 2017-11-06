@@ -9,7 +9,7 @@
 If you don't use `yarn`, first:
 
 ```sh
-npm install yarn --save-dev
+npm install -g yarn
 ```
 
 Afterwards, just:
@@ -33,7 +33,7 @@ With the knowledge of who is around it, and when, `A.D.A.M.` can help serve mult
 
 `A.D.A.M.` is built using "modern" **Javascript**. This means that the code is written exclusively using [ECMAScript 6](https://github.com/lukehoban/es6features). The reason for this is purely subjective and academic.
 
-Because of `A.D.A.M.`'s current reliance on network device tracking, that component of its infrastructure is of critical importance. Without it, `A.D.A.M.` will simply not work. If all of the bundled (device) `managers` are incompatible with you setup, you will need to implement your own as the first step.
+Because of `A.D.A.M.`'s current reliance on network device tracking, that component of its infrastructure is of critical importance. Without it, `A.D.A.M.` will simply not work. If all of the bundled production (device) `managers` are incompatible with you setup, you will need to implement your own as the first step. A demo manager is available for testing.
 
 
 ## See Also
