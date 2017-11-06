@@ -15,7 +15,7 @@ let adam     = express();
 
 // init
 database.set("active", []).write();
-database.set("timestamp", Date.now()).write();
+database.set("bootTime", Date.now()).write();
 
 
 // workers
@@ -28,7 +28,6 @@ let devicesWorker = new Worker({
             if (error) { logger.error(`[${wName}] ${error}`); }
             else {
                 let nActive = [];
-                let currentTime = Date.now();
 
                 database.get("active").value().forEach(device => {
                     if ( data.devices.find((d) => { return device.mac === d.mac; }) ) {
@@ -41,11 +40,16 @@ let devicesWorker = new Worker({
 
                 data.devices.forEach(device => {
                     let known = database.get("devices").find({mac : device.mac}).value();
+                    device.lastSeen = data.timestamp;
 
-                    if (! known) { database.get("devices").push(device).write(); }
+                    if (! known) {
+                        database.get("devices").push(device).write();
+                    } else {
+                        database.get("devices").find({ mac : device.mac }).assign({ lastSeen: data.timestamp }).write();
+                    }
 
                     if (! (nActive.find( (d) => { return device.mac === d.mac; } )) ) {
-                        nActive.push({ mac : device.mac, timestamp : currentTime });
+                        nActive.push({ mac : device.mac, joinTime : data.timestamp });
                         logger.info(`[${wName}] Device [${device.mac} / ${device.name}] has JOINED the network.`);
                     }
 

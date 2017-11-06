@@ -28,7 +28,7 @@ db.defaults({
     active:  [],
     people:  [],
     devices: [],
-    timestamp: 0
+    bootTime: 0
 }).write();
 
 // Logger
