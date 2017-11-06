@@ -49,15 +49,9 @@ let winston = new Winston.Logger({
 let demoManager = new DemoManager({ logger: winston });
 let technicolor = new TG784n({
     logger: winston,
-    timeout: 5000,
-    host: (process.env.MANAGER_HOST || "127.0.0.1") + ":" + (process.env.MANAGER_PORT || "23"),
-    loginPrompt: /Username[: ]+/i,
-    passwordPrompt: /Password[: ]+/i,
-    failedLoginMatch: /invalid/i,
-    shellPrompt: /=>/i,
+    host:     (process.env.MANAGER_HOST   || "127.0.0.1") + ":" + (process.env.MANAGER_PORT || "23"),
     username: (process.env.MANAGER_USER   || "username"),
-    password: (process.env.MANAGER_PASSWD || "password"),
-    comand: "hostmgr list"
+    password: (process.env.MANAGER_PASSWD || "password")
 });
 env.development.manager = demoManager;
 env.production.manager  = technicolor;

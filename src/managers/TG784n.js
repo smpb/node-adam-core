@@ -10,6 +10,14 @@ import DeviceManager  from "DeviceManager";
 
 export default class TG784n extends DeviceManager {
     constructor (options={}) {
+        options = Object.assign({
+            timeout: 5000,
+            loginPrompt: /Username[: ]+/i,
+            passwordPrompt: /Password[: ]+/i,
+            failedLoginMatch: /invalid/i,
+            shellPrompt: /=>/i,
+            comand: "hostmgr list"
+        }, options);
         options._module = path.basename(__filename, ".js");
         super(options);
 
