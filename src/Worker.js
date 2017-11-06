@@ -8,7 +8,7 @@ import Config from "Config";
  */
 
 export default class Worker {
-    constructor (options) {
+    constructor (options={}) {
         this.state = Object.assign({
             name : "anonymous",
             heart: {},

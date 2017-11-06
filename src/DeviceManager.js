@@ -19,12 +19,12 @@ import path from "path";
  *                  {
  *                      mac  : "83:f1:f4:c2:34:b6",
  *                      ip   : "192.168.1.12",
- *                      name : "Johns-iPhone"
+ *                      name : "Johns-Phone"
  *                  },
  *                  {
  *                      mac  : "62:e8:d4:12:f3:a9",
  *                      ip   : "192.168.1.45",
- *                      name : "Janes-iPhone"
+ *                      name : "Janes-Phone"
  *                  }
  *              ]
  *          }
@@ -34,7 +34,7 @@ import path from "path";
  */
 
 export default class DeviceManager {
-    constructor (options) {
+    constructor (options={}) {
         // Abstract class checks
         if (new.target === DeviceManager)
             throw new TypeError("Unable to instantiate an abstract 'DeviceManager'.");

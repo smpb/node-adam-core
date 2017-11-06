@@ -9,7 +9,7 @@ import DeviceManager  from "DeviceManager";
  */
 
 export default class TG784n extends DeviceManager {
-    constructor (options) {
+    constructor (options={}) {
         options._module = path.basename(__filename, ".js");
         super(options);
 

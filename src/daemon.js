@@ -22,7 +22,7 @@ database.set("timestamp", Date.now()).write();
 let wName = "devices-worker";
 let devicesWorker = new Worker({
     name: wName,
-    heartbeat: 60000,
+    heartbeat: Config.heartbeat,
     action: () => {
         manager.getActiveDevices( (error, data) => {
             if (error) { logger.error(`[${wName}] ${error}`); }

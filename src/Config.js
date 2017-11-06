@@ -1,17 +1,20 @@
-import lowDB     from "lowdb";
-import FileSync  from "lowdb/adapters/FileSync";
-import Winston   from "winston";
-import TG784n    from "managers/TG784n";
+import lowDB       from "lowdb";
+import FileSync    from "lowdb/adapters/FileSync";
+import Winston     from "winston";
+import TG784n      from "managers/TG784n";
+import DemoManager from "managers/DemoManager";
 
 
 // Enviroment specific settings
 let env = {
     development: {
         logLevel: "debug",
+        heartbeat: 10000,
         database: "adam-dev.json"
     },
     production: {
         logLevel: "info",
+        heartbeat: 60000,
         database: "adam.json"
     }
 };
@@ -42,7 +45,8 @@ let winston = new Winston.Logger({
 });
 
 
-// Default device manager
+// device managers
+let demoManager = new DemoManager({ logger: winston });
 let technicolor = new TG784n({
     logger: winston,
     timeout: 5000,
@@ -55,6 +59,8 @@ let technicolor = new TG784n({
     password: (process.env.MANAGER_PASSWD || "password"),
     comand: "hostmgr list"
 });
+env.development.manager = demoManager;
+env.production.manager  = technicolor;
 
 
 // Unsafe resilience to "unexpected" interruptions
@@ -72,6 +78,7 @@ const config = {
     port: 8080,
     logger: winston,
     database: db,
-    deviceManager: technicolor
+    heartbeat: env[key].heartbeat,
+    deviceManager: env[key].manager
 };
 export default config;
