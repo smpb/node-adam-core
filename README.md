@@ -1,18 +1,20 @@
 # A.D.A.M.
 
-![node version](https://img.shields.io/badge/node-%3E%3D4.0.0-green.svg) [![license](https://img.shields.io/badge/license-MIT%20License-blue.svg)](https://github.com/smpb/node-adam-core/blob/master/LICENSE)
+![node version](https://img.shields.io/badge/node-%3E%3D4.8.0-green.svg) [![license](https://img.shields.io/badge/license-MIT%20License-blue.svg)](https://github.com/smpb/node-adam-core/blob/master/LICENSE)
 > Automations, Devices, and Alerts, Manager
 
 
 ## Quick Start
 
-If you don't use `yarn`, first:
+Using `[npm](https://www.npmjs.com/)`:
 
 ```sh
-npm install -g yarn
+npm install
+npm run build
+npm run start
 ```
 
-Afterwards, just:
+Using `[yarn](https://yarnpkg.com/)`:
 
 ```sh
 yarn
@@ -33,7 +35,7 @@ With the knowledge of who is around it, and when, `A.D.A.M.` can help serve mult
 
 `A.D.A.M.` is built using "modern" **Javascript**. This means that the code is written exclusively using [ECMAScript 6](https://github.com/lukehoban/es6features). The reason for this is purely subjective and academic.
 
-Because of `A.D.A.M.`'s current reliance on network device tracking, that component of its infrastructure is of critical importance. Without it, `A.D.A.M.` will simply not work. If all of the bundled production (device) `managers` are incompatible with you setup, you will need to implement your own as the first step. A demo manager is available for testing.
+Because of `A.D.A.M.`'s current reliance on network device tracking, that component of its infrastructure is of critical importance. Without it, `A.D.A.M.` will simply not work. If all of the bundled production (device) `managers` are incompatible with your setup, you will need to implement your own as the first step. A demo manager is available for testing.
 
 
 ## See Also
