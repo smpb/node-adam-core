@@ -1,5 +1,5 @@
-import path from "path";
 import DeviceManager from "DeviceManager";
+import path from "path";
 
 /*
  * Demo device manager
