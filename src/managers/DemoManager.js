@@ -20,7 +20,7 @@ export default class DemoManager extends DeviceManager {
 
             let randomChance = Math.round(Math.random() * (100 - 1) + 1);
             if (randomChance > 80) {
-                throw new Error("[${this.moduleName}] 'getActiveDevices' fake timeout for testing.");
+                throw new Error(`[${this.moduleName}] 'getActiveDevices' fake timeout for testing.`);
             }
 
             let date = new Date();
