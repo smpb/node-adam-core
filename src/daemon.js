@@ -1,8 +1,8 @@
-import Config    from "Config";
-import Worker    from "Worker";
-import lowDB     from "lowdb";
-import FileAsync from "lowdb/adapters/FileAsync";
-import express   from "express";
+import Config       from "Config";
+import DeviceWorker from "workers/DeviceWorker";
+import lowDB        from "lowdb";
+import FileAsync    from "lowdb/adapters/FileAsync";
+import express      from "express";
 
 /*
  * A. D. A. M. - Automations, Devices, and Alerts, Manager
@@ -15,68 +15,43 @@ let adam     = express();
 
 
 // setup
-lowDB( new FileAsync( database ) )
+lowDB(new FileAsync( database ))
     .then( db => {
 
         // workers
-        let devicesWorker = new Worker({
-            name: "DevicesWorker",
+        let deviceWorker = new DeviceWorker({
             heartbeat: Config.heartbeat,
-            action: () => {
-                manager.getActiveDevices()
-                    .then( data => {
-                        db.get("active").value().forEach(device => {
-                            if (! data.devices.find((d) => { return device.mac === d.mac; }) ) {
-                                let absentDevice = db.get("devices").find({mac : device.mac}).value();
-                                devicesWorker.emit("deviceDisconnected", { device : absentDevice, timestamp : data.timestamp });
-                            }
-                        });
-
-                        data.devices.forEach(device => {
-                            let known = db.get("devices").find({mac : device.mac}).value();
-
-                            if (! known) {
-                                devicesWorker.emit("newDevice", { device : device, timestamp : data.timestamp });
-                            } else {
-                                devicesWorker.emit("deviceHeartbeat", { device : device, timestamp : data.timestamp });
-                            }
-
-                            if (! db.get("active").find({ mac : device.mac}).value() ) {
-                                devicesWorker.emit("deviceConnected", { device : device, timestamp : data.timestamp });
-                            }
-                        });
-                    })
-                    .catch( error => { devicesWorker.emit("error", error); });
-            }
+            manager:   manager,
+            database : db
         });
-        devicesWorker.on("error", (error) => { logger.error(`[${devicesWorker.moduleName}] ${error}`); });
 
-        devicesWorker.on("newDevice", (data) => {
+        deviceWorker.on("error", (error) => { logger.error(`[${deviceWorker.moduleName}] ${error}`); });
+        deviceWorker.on("newDevice", (data) => {
             data.device.lastSeen = data.timestamp;
             db.get("devices").push(data.device).write().then(() => {
-                logger.info(`[${devicesWorker.moduleName}] Device [${data.device.mac} / ${data.device.name}] is NEW.`);
+                logger.info(`[${deviceWorker.moduleName}] Device [${data.device.mac} / ${data.device.name}] is NEW.`);
             });
         });
-        devicesWorker.on("deviceHeartbeat", (data) => {
+        deviceWorker.on("deviceHeartbeat", (data) => {
             db.get("devices").find({ mac : data.device.mac }).assign({ lastSeen: data.timestamp })
                 .write().then(() => {
-                    logger.debug(`[${devicesWorker.moduleName}] Device [${data.device.mac} / ${data.device.name}] has IP '${data.device.ip}'.`);
+                    logger.debug(`[${deviceWorker.moduleName}] Device [${data.device.mac} / ${data.device.name}] has IP '${data.device.ip}'.`);
                 });
         });
-        devicesWorker.on("deviceConnected", (data) => {
+        deviceWorker.on("deviceConnected", (data) => {
             db.get("active").push({ mac : data.device.mac, joinTime : data.timestamp })
                 .write().then(() => {
-                    logger.info(`[${devicesWorker.moduleName}] Device [${data.device.mac} / ${data.device.name}] has JOINED the network.`);
+                    logger.info(`[${deviceWorker.moduleName}] Device [${data.device.mac} / ${data.device.name}] has JOINED the network.`);
                 });
         });
-        devicesWorker.on("deviceDisconnected", (data) => {
+        deviceWorker.on("deviceDisconnected", (data) => {
             db.get("active").remove({mac : data.device.mac})
                 .write().then(() => {
-                    logger.info(`[${devicesWorker.moduleName}] Device [${data.device.mac} / ${data.device.name}] has LEFT the network.`);
+                    logger.info(`[${deviceWorker.moduleName}] Device [${data.device.mac} / ${data.device.name}] has LEFT the network.`);
                 });
         });
 
-        adam.set("devicesWorker", devicesWorker);
+        adam.set("deviceWorker", deviceWorker);
 
         // routes
         adam.get("/", (req, res) => {
@@ -92,6 +67,7 @@ lowDB( new FileAsync( database ) )
             res.json( devices );
         });
 
+        // database
         return db.defaults({
             active:  [],
             people:  [],
@@ -100,9 +76,7 @@ lowDB( new FileAsync( database ) )
         }).set("active", []).set("bootTime", Date.now()).write();
     })
     .then(() => {
-        logger.debug(`[lowDB] Setup of flat file '${database}' complete.`);
-
-        adam.get("devicesWorker").start();
+        adam.get("deviceWorker").start();
         adam.listen( Config.port );
     });
 
