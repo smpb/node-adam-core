@@ -1,5 +1,3 @@
-import lowDB       from "lowdb";
-import FileSync    from "lowdb/adapters/FileSync";
 import Winston     from "winston";
 import TG784n      from "managers/TG784n";
 import DemoManager from "managers/DemoManager";
@@ -20,16 +18,6 @@ let env = {
 };
 let key = process.env.NODE_ENV || "development";
 
-
-// Database
-let db = lowDB( new FileSync(env[key].database) );
-
-db.defaults({
-    active:  [],
-    people:  [],
-    devices: [],
-    bootTime: 0
-}).write();
 
 // Logger
 let winston = new Winston.Logger({
@@ -58,10 +46,10 @@ env.production.manager  = technicolor;
 
 
 // Configuration object
-const config = {
+let config = {
     port: 8080,
     logger: winston,
-    database: db,
+    database: env[key].database,
     heartbeat: env[key].heartbeat,
     deviceManager: env[key].manager
 };
