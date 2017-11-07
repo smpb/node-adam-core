@@ -1,6 +1,6 @@
 # A.D.A.M.
 
-![node version](https://img.shields.io/badge/node-%3E%3D4.8.0-green.svg) [![license](https://img.shields.io/badge/license-MIT%20License-blue.svg)](https://github.com/smpb/node-adam-core/blob/master/LICENSE)
+![node version](https://img.shields.io/badge/node-%3E%3D6.9.0-green.svg) [![license](https://img.shields.io/badge/license-MIT%20License-blue.svg)](https://github.com/smpb/node-adam-core/blob/master/LICENSE)
 > Automations, Devices, and Alerts, Manager
 
 
