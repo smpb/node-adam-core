@@ -9,9 +9,8 @@ import path from "path";
  * according to your setup, by extending this and implementing the following:
  *
  *    getActiveDevices
- *      @param {function} a callback function that will be called once retrieval is done.
- *      @returns {object} data that will be passed as the second argument (the first being possible errors)
- *                        to the callback; it is expected to be in the format of the following example:
+ *      @returns {Promise}  A Promise that resolves with the list of active devices;
+ *                          Active device data is expected to be in the following format:
  *
  *          {
  *              timestamp : 1509740200000,

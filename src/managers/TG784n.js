@@ -27,19 +27,19 @@ export default class TG784n extends DeviceManager {
             () => {},
             (error) => {
                 this.clientExit();
-                return this.client.callback( error, {} );
+                throw new Error( error );
             }
         );
 
         this.client.data.subscribe((data) => {
             if (data.match(options.loginPrompt)) {
-                this.options.logger.silly(`[${this.moduleName}] Received login prompt`);
+                this.options.logger.debug(`[${this.moduleName}] Received login prompt`);
                 this.client.sendln( options.username );
             } else if (data.match(options.passwordPrompt)) {
-                this.options.logger.silly(`[${this.moduleName}] Received password prompt`);
+                this.options.logger.debug(`[${this.moduleName}] Received password prompt`);
                 this.client.sendln( options.password );
             } else if (data.match(options.shellPrompt)) {
-                this.options.logger.silly(`[${this.moduleName}] Received the shell prompt`);
+                this.options.logger.debug(`[${this.moduleName}] Received the shell prompt`);
                 if ( this.client.communicating ) {
                     this.client.buffer = this.client.buffer.concat(data);
                     this.client.communicating = false;
@@ -50,7 +50,7 @@ export default class TG784n extends DeviceManager {
                 }
 
                 if ((this.client.buffer !== "") && (! this.client.communicating)) {
-                    this.options.logger.debug(`[${this.moduleName}] Active network devices collection complete.`);
+                    this.options.logger.info(`[${this.moduleName}] Active network devices collection complete.`);
                     this.options.logger.silly(`[${this.moduleName}] ${this.client.buffer}`);
                     this.clientExit();
 
@@ -59,7 +59,7 @@ export default class TG784n extends DeviceManager {
                     this.client.buffer.split("\n").forEach((row) => {
                         if (row.match(/[:a-f0-9]{17}/i)) {
                             let column = row.split(/\s+/);
-                            if ( column[2].match(/^[CD]+L$/) ) {
+                            if ( column[2].match(/CD?L$/) ) {
                                 parsedInfo.devices.push({
                                     mac  : column[0],
                                     ip   : column[1],
@@ -70,10 +70,10 @@ export default class TG784n extends DeviceManager {
                     });
 
                     this.info = parsedInfo;
-                    return this.client.callback( null, this.info );
+                    return this.client.callback( this.info );
                 }
             } else if ( this.client.communicating ) {
-                this.options.logger.silly(`[${this.moduleName}] Received some data`);
+                this.options.logger.debug(`[${this.moduleName}] Received some data`);
                 this.client.buffer = this.client.buffer.concat(data);
             }
         });
@@ -88,10 +88,17 @@ export default class TG784n extends DeviceManager {
 
 
     // methods
-    getActiveDevices(callback) {
-        this.options.logger.debug(`[${this.moduleName}] Getting the active network devices...`);
-        this.client.callback = callback;
-        this.client.timer    = Timer.setTimeout(this.clientExit, this.options.timeout);
-        this.client.connect();
+    getActiveDevices() {
+        return new Promise( (resolve, reject) => {
+            this.options.logger.info(`[${this.moduleName}] Getting the active network devices...`);
+
+            this.client.timer = Timer.setTimeout(() => {
+                this.clientExit();
+                reject(new Error(`[${this.moduleName}] Error: timeout after ${this.options.timeout} ms.`));
+            }, this.options.timeout);
+
+            this.client.callback = resolve;
+            this.client.connect();
+        });
     }
 }

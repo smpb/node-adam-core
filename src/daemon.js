@@ -23,9 +23,8 @@ let devicesWorker = new Worker({
     name: "DevicesWorker",
     heartbeat: Config.heartbeat,
     action: () => {
-        manager.getActiveDevices( (error, data) => {
-            if (error) { devicesWorker.emit("error", error); }
-            else {
+        manager.getActiveDevices()
+            .then( data => {
                 database.get("active").value().forEach(device => {
                     if (! data.devices.find((d) => { return device.mac === d.mac; }) ) {
                         let absentDevice = database.get("devices").find({mac : device.mac}).value();
@@ -46,8 +45,8 @@ let devicesWorker = new Worker({
                         devicesWorker.emit("deviceConnected", { device : device, timestamp : data.timestamp });
                     }
                 });
-            }
-        });
+            })
+            .catch( error => { devicesWorker.emit("error", error); });
     }
 });
 devicesWorker.on("error", (error) => { logger.error(`[${devicesWorker.moduleName}] ${error}`); });
