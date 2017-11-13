@@ -1,8 +1,10 @@
-import Config       from "Config";
-import DeviceWorker from "workers/DeviceWorker";
-import lowDB        from "lowdb";
-import FileAsync    from "lowdb/adapters/FileAsync";
-import express      from "express";
+import Config           from "Config";
+import DeviceWorker     from "workers/DeviceWorker";
+import LocationWorker   from "workers/LocationWorker";
+import lowDB            from "lowdb";
+import FileAsync        from "lowdb/adapters/FileAsync";
+import express          from "express";
+import bodyParser       from "body-parser";
 
 /*
  * A. D. A. M. - Automations, Devices, and Alerts, Manager
@@ -19,10 +21,16 @@ lowDB(new FileAsync( database ))
     .then( db => {
 
         // workers
+        let locationWorker = new LocationWorker({
+            logger: logger,
+            database: db,
+            weatherToken: Config.weatherToken
+        });
+
         let deviceWorker = new DeviceWorker({
             heartbeat: Config.heartbeat,
             manager:   manager,
-            database : db
+            database: db
         });
 
         deviceWorker.on("error", (error) => { logger.error(`[${deviceWorker.moduleName}] ${error}`); });
@@ -51,11 +59,16 @@ lowDB(new FileAsync( database ))
                 });
         });
 
+        // express setup
+        adam.use( bodyParser.json() );                          // to support JSON-encoded bodies
+        adam.use( bodyParser.urlencoded({ extended: true }) );  // to support URL-encoded bodies
+
+        adam.set("locationWorker", locationWorker);
         adam.set("deviceWorker", deviceWorker);
 
-        // routes
+        // express routes
         adam.get("/", (req, res) => {
-            let serverTime = database.get("timestamp").value();
+            let serverTime = db.get("timestamp").value();
             let currentTime = Date.now();
             let elapsed = Math.round((currentTime - serverTime) / 1000);
 
@@ -69,14 +82,17 @@ lowDB(new FileAsync( database ))
 
         // database
         return db.defaults({
-            active:  [],
-            people:  [],
-            devices: [],
+            active:   [],
+            people:   [],
+            devices:  [],
+            location: {},
+            weather:  {},
             bootTime: 0
         }).set("active", []).set("bootTime", Date.now()).write();
     })
     .then(() => {
+        adam.get("locationWorker").start();
         adam.get("deviceWorker").start();
         adam.listen( Config.port );
-    });
-
+    })
+    .catch( error => { logger.error( error ); });

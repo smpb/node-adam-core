@@ -49,6 +49,7 @@ env.production.manager  = technicolor;
 let config = {
     port: 8080,
     logger: winston,
+    weatherToken: "<OPENWEATHERMAP.ORG KEY>",
     database: env[key].database,
     heartbeat: env[key].heartbeat,
     deviceManager: env[key].manager
