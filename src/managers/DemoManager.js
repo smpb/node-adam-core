@@ -14,9 +14,9 @@ export default class DemoManager extends DeviceManager {
 
 
     // methods
-    getActiveDevices(callback) {
+    getActiveDevices() {
         return new Promise( (resolve, reject) => {
-            this.options.logger.debug(`[${this.moduleName}] Getting the active network devices...`);
+            this.logger.debug(`[${this.moduleName}] Getting the active network devices...`);
 
             let randomChance = Math.round(Math.random() * (100 - 1) + 1);
             if (randomChance > 80) {
@@ -38,7 +38,7 @@ export default class DemoManager extends DeviceManager {
             if ((date.getMinutes() % 5) !== 0) { info.devices.push( phoneA ); }
             if ((date.getMinutes() % 2) !== 0) { info.devices.push( phoneB ); }
 
-            this.options.logger.debug(`[${this.moduleName}] Active network devices collection complete.`);
+            this.logger.debug(`[${this.moduleName}] Active network devices collection complete.`);
 
             resolve( info );
         });

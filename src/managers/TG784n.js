@@ -11,6 +11,10 @@ import { Telnet }     from "telnet-rxjs";
 export default class TG784n extends DeviceManager {
     constructor (options={}) {
         options = Object.assign({
+            _module: path.basename(__filename, ".js"),
+            host: "127.0.0.1:23",
+            username: "username",
+            password: "password",
             timeout: 5000,
             loginPrompt: /Username[: ]+/i,
             passwordPrompt: /Password[: ]+/i,
@@ -18,10 +22,10 @@ export default class TG784n extends DeviceManager {
             shellPrompt: /=>/i,
             comand: "hostmgr list"
         }, options);
-        options._module = path.basename(__filename, ".js");
+
         super(options);
 
-        this.client = Telnet.client( options.host );
+        this.client = Telnet.client( this.host );
 
         this.client.subscribe(
             () => {},
@@ -32,26 +36,26 @@ export default class TG784n extends DeviceManager {
         );
 
         this.client.data.subscribe((data) => {
-            if (data.match(options.loginPrompt)) {
-                this.options.logger.debug(`[${this.moduleName}] Received login prompt`);
-                this.client.sendln( options.username );
-            } else if (data.match(options.passwordPrompt)) {
-                this.options.logger.debug(`[${this.moduleName}] Received password prompt`);
-                this.client.sendln( options.password );
-            } else if (data.match(options.shellPrompt)) {
-                this.options.logger.debug(`[${this.moduleName}] Received the shell prompt`);
+            if (data.match(this.loginPrompt)) {
+                this.logger.debug(`[${this.moduleName}] Received login prompt`);
+                this.client.sendln(this.username);
+            } else if (data.match(this.passwordPrompt)) {
+                this.logger.debug(`[${this.moduleName}] Received password prompt`);
+                this.client.sendln(this.password);
+            } else if (data.match(this.shellPrompt)) {
+                this.logger.debug(`[${this.moduleName}] Received the shell prompt`);
                 if ( this.client.communicating ) {
                     this.client.buffer = this.client.buffer.concat(data);
                     this.client.communicating = false;
                 } else {
                     this.client.communicating = true;
                     this.client.buffer = "\r\n";
-                    this.client.sendln( options.comand );
+                    this.client.sendln(this.comand);
                 }
 
                 if ((this.client.buffer !== "") && (! this.client.communicating)) {
-                    this.options.logger.info(`[${this.moduleName}] Active network devices collection complete.`);
-                    this.options.logger.silly(`[${this.moduleName}] ${this.client.buffer}`);
+                    this.logger.info(`[${this.moduleName}] Active network devices collection complete.`);
+                    this.logger.silly(`[${this.moduleName}] ${this.client.buffer}`);
                     this.clientExit();
 
                     let parsedInfo = { timestamp : Date.now(), devices : [] };
@@ -73,7 +77,7 @@ export default class TG784n extends DeviceManager {
                     return this.client.callback( this.info );
                 }
             } else if ( this.client.communicating ) {
-                this.options.logger.debug(`[${this.moduleName}] Received some data`);
+                this.logger.debug(`[${this.moduleName}] Received some data`);
                 this.client.buffer = this.client.buffer.concat(data);
             }
         });
@@ -90,12 +94,12 @@ export default class TG784n extends DeviceManager {
     // methods
     getActiveDevices() {
         return new Promise( (resolve, reject) => {
-            this.options.logger.info(`[${this.moduleName}] Getting the active network devices...`);
+            this.logger.info(`[${this.moduleName}] Getting the active network devices...`);
 
             this.client.timer = Timer.setTimeout(() => {
                 this.clientExit();
-                reject(new Error(`[${this.moduleName}] Error: timeout after ${this.options.timeout} ms.`));
-            }, this.options.timeout);
+                reject(new Error(`[${this.moduleName}] Error: timeout after ${this.timeout} ms.`));
+            }, this.timeout);
 
             this.client.callback = resolve;
             this.client.connect();

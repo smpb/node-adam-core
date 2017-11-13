@@ -14,15 +14,13 @@ export default class Worker extends EventEmitter {
         super();
 
         options = Object.assign({
+            _module: path.basename(__filename, ".js"),
             heart: {},
             heartbeat: 10000,
             action: () => { Config.logger.debug("[Worker] Triggered action from 'anonymous'."); }
         }, options);
 
-        this._module    = options._module || path.basename(__filename, ".js");
-        this.heart      = options.heart;
-        this.heartbeat  = options.heartbeat;
-        this.action     = options.action;
+        Object.assign(this, options);
     }
 
     // methods

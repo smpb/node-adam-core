@@ -40,9 +40,12 @@ export default class DeviceManager {
         if (this.getActiveDevices === undefined)
             throw new TypeError("Derived class must override method 'getActiveDevices'");
 
-        this.options = options;
-        this._module = options._module || path.basename(__filename, ".js");
-        this.info    = { timestamp : 0, devices : [] };
+        options = Object.assign({
+            _module: path.basename(__filename, ".js"),
+            info: { timestamp : 0, devices : [] }
+        }, options);
+
+        Object.assign(this, options);
     }
 
     // methods
