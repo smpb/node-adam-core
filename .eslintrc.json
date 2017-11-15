@@ -8,21 +8,23 @@
         "sourceType": "module"
     },
     "rules": {
+        "no-unused-vars": 1,
+        "no-console": 1,
         "strict" : 1,
         "indent": [
-            "error",
+            "warn",
             4
         ],
         "linebreak-style": [
-            "error",
+            "warn",
             "unix"
         ],
         "quotes": [
-            "error",
+            "warn",
             "double"
         ],
         "semi": [
-            "error",
+            "warn",
             "always"
         ]
     }
