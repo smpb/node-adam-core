@@ -1,7 +1,8 @@
 import DeviceManager  from "DeviceManager";
-import path           from "path";
+import Device         from "model/Device";
 import Timer          from "timers";
 import { Telnet }     from "telnet-rxjs";
+
 
 /*
  * Device manager 'Technicolor TG784n v3'
@@ -11,7 +12,7 @@ import { Telnet }     from "telnet-rxjs";
 export default class TG784n extends DeviceManager {
     constructor (options={}) {
         options = Object.assign({
-            _module: path.basename(__filename, ".js"),
+            name: "TG784n",
             host: "127.0.0.1:23",
             username: "username",
             password: "password",
@@ -22,7 +23,6 @@ export default class TG784n extends DeviceManager {
             shellPrompt: /=>/i,
             comand: "hostmgr list"
         }, options);
-
         super(options);
 
         this.client = Telnet.client( this.host );
@@ -37,13 +37,13 @@ export default class TG784n extends DeviceManager {
 
         this.client.data.subscribe((data) => {
             if (data.match(this.loginPrompt)) {
-                this.logger.debug(`[${this.moduleName}] Received login prompt`);
+                this.logger.debug(`[${this.name}] Received login prompt`);
                 this.client.sendln(this.username);
             } else if (data.match(this.passwordPrompt)) {
-                this.logger.debug(`[${this.moduleName}] Received password prompt`);
+                this.logger.debug(`[${this.name}] Received password prompt`);
                 this.client.sendln(this.password);
             } else if (data.match(this.shellPrompt)) {
-                this.logger.debug(`[${this.moduleName}] Received the shell prompt`);
+                this.logger.debug(`[${this.name}] Received the shell prompt`);
                 if ( this.client.communicating ) {
                     this.client.buffer = this.client.buffer.concat(data);
                     this.client.communicating = false;
@@ -54,17 +54,17 @@ export default class TG784n extends DeviceManager {
                 }
 
                 if ((this.client.buffer !== "") && (! this.client.communicating)) {
-                    this.logger.info(`[${this.moduleName}] Active network devices collection complete.`);
-                    this.logger.silly(`[${this.moduleName}] ${this.client.buffer}`);
+                    this.logger.info(`[${this.name}] Active network devices collection complete.`);
+                    this.logger.silly(`[${this.name}] ${this.client.buffer}`);
                     this.clientExit();
 
-                    let parsedInfo = { timestamp : Date.now(), devices : [] };
+                    let devices = [];
 
                     this.client.buffer.split("\n").forEach((row) => {
                         if (row.match(/[:a-f0-9]{17}/i)) {
                             let column = row.split(/\s+/);
                             if ( column[2].match(/CD?L$/) ) {
-                                parsedInfo.devices.push({
+                                devices.push({
                                     mac  : column[0],
                                     ip   : column[1],
                                     name : column[6]
@@ -73,11 +73,14 @@ export default class TG784n extends DeviceManager {
                         }
                     });
 
-                    this.info = parsedInfo;
-                    return this.client.callback( this.info );
+                    Promise.all( devices.map(d => { return Device.load(d); }) )
+                    .then(devices => {
+                        this.info = { time : Date.now(), devices : devices };
+                        return this.client.callback( this.info );
+                    });
                 }
             } else if ( this.client.communicating ) {
-                this.logger.debug(`[${this.moduleName}] Received some data`);
+                this.logger.debug(`[${this.name}] Received some data`);
                 this.client.buffer = this.client.buffer.concat(data);
             }
         });
@@ -94,11 +97,11 @@ export default class TG784n extends DeviceManager {
     // methods
     getActiveDevices() {
         return new Promise( (resolve, reject) => {
-            this.logger.info(`[${this.moduleName}] Getting the active network devices...`);
+            this.logger.info(`[${this.name}] Getting the active network devices...`);
 
             this.client.timer = Timer.setTimeout(() => {
                 this.clientExit();
-                reject(new Error(`[${this.moduleName}] Error: timeout after ${this.timeout} ms.`));
+                reject(new Error(`[${this.name}] Error: timeout after ${this.timeout} ms.`));
             }, this.timeout);
 
             this.client.callback = resolve;

@@ -1,6 +1,7 @@
-import Worker from "Worker";
-import path   from "path";
-import axios  from "axios";
+import Config    from "Config";
+import Worker    from "Worker";
+import Database  from "Database";
+import axios     from "axios";
 
 /*
  * Worker to update the conditions around A.D.A.M.'s location
@@ -8,35 +9,38 @@ import axios  from "axios";
  */
 export default class LocationWorker extends Worker {
     constructor (options={}) {
-        let logger = options.logger;
-        let database = options.database;
-        let weatherToken = options.weatherToken;
-
         super({
-            _module: path.basename(__filename, ".js"),
+            name: "LocationWorker",
             heartbeat: 3600000,
             action: () => {
-                let geo = axios.create({ baseURL: "https://ipapi.co/" });
-                let weather = axios.create({ baseURL: "https://api.openweathermap.org/data/2.5/" });
+                let ipAPI = axios.create({ baseURL: "https://ipapi.co/" });
+                let owm   = axios.create({ baseURL: "https://api.openweathermap.org/data/2.5/" });
 
-                geo.get("/json")
-                    .then( res => { return database.set("location", res.data).write(); })
-                    .then( ( ) => {
-                        let location = database.get("location").value();
-                        return weather.get("/weather", {
+                let location;
+                let weather;
+
+                ipAPI.get("/json")
+                    .then(res => {
+                        location = res.data;
+                        return owm.get("/weather", {
                             params : {
-                                APPID: weatherToken,
-                                lat: location.latitude,
-                                lon: location.longitude,
+                                APPID: Config.weatherToken,
+                                lat:   location.latitude,
+                                lon:   location.longitude,
                                 units: "metric"
                             }
                         });
                     })
-                    .then( res => { return database.set("weather", res.data).write(); } )
-                    .then( ( ) => {
-                        logger.info(`[${this.moduleName}] Updated location information.`);
+                    .then(res => {
+                        weather = res.data;
+                        return Database.then(db => {
+                            db.set("location", location).set("weather", weather).write();
+                        })
                     })
-                    .catch( error => { logger.error(`[${this.moduleName}] ${error}`); } );
+                    .then(() => {
+                        Config.logger.info(`[${this.name}] Updated location information.`);
+                    })
+                    .catch(error => { Config.logger.error(`[${this.name}] ${error}`); });
             }
         });
     }

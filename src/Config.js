@@ -1,7 +1,9 @@
-import Winston     from "winston";
-import TG784n      from "managers/TG784n";
-import DemoManager from "managers/DemoManager";
+import Winston from "winston";
 
+/*
+ * A.D.A.M. configuration
+ *
+ */
 
 // Enviroment specific settings
 let env = {
@@ -19,7 +21,7 @@ let env = {
 let key = process.env.NODE_ENV || "development";
 
 
-// Logger
+// Logger configuration
 let winston = new Winston.Logger({
     level: env[key].logLevel,
     transports: [
@@ -33,25 +35,24 @@ let winston = new Winston.Logger({
 });
 
 
-// device managers
-let demoManager = new DemoManager({ logger: winston });
-let technicolor = new TG784n({
-    logger: winston,
-    host:     (process.env.MANAGER_HOST   || "127.0.0.1") + ":" + (process.env.MANAGER_PORT || "23"),
-    username: (process.env.MANAGER_USER   || "username"),
-    password: (process.env.MANAGER_PASSWD || "password")
-});
-env.development.manager = demoManager;
-env.production.manager  = technicolor;
+// device manager configurations
+env.development.manager = { logger: winston };
+env.production.manager  = {
+    logger:    winston,
+    host:      (process.env.MANAGER_HOST   || "127.0.0.1") + ":" + (process.env.MANAGER_PORT || "23"),
+    username:  (process.env.MANAGER_USER   || "username"),
+    password:  (process.env.MANAGER_PASSWD || "password")
+};
 
 
 // Configuration object
 let config = {
-    port: 8080,
-    logger: winston,
-    weatherToken: "<OPENWEATHERMAP.ORG KEY>",
-    database: env[key].database,
-    heartbeat: env[key].heartbeat,
-    deviceManager: env[key].manager
+    env:            key,
+    port:           8080,
+    logger:         winston,
+    weatherToken:   "<OPENWEATHERMAP.ORG KEY>",
+    database:       env[key].database,
+    heartbeat:      env[key].heartbeat,
+    deviceManager:  env[key].manager
 };
 export default config;

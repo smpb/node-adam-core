@@ -1,4 +1,4 @@
-import path from "path";
+import Config from "Config";
 
 /*
  * Abstract class representing the manager that scans, and keeps track,
@@ -13,18 +13,18 @@ import path from "path";
  *                          Active device data is expected to be in the following format:
  *
  *          {
- *              timestamp : 1509740200000,
- *              devices   : [
- *                  {
- *                      mac  : "83:f1:f4:c2:34:b6",
- *                      ip   : "192.168.1.12",
- *                      name : "Johns-Phone"
- *                  },
- *                  {
- *                      mac  : "62:e8:d4:12:f3:a9",
- *                      ip   : "192.168.1.45",
- *                      name : "Janes-Phone"
- *                  }
+ *              time: 1509740200000,
+ *              devices: [
+ *                  Device.load({
+ *                      ip:    "192.168.1.12",
+ *                      mac:   "83:f1:f4:c2:34:b6",
+ *                      name:  "Johns-Phone"
+ *                  }),
+ *                  Device.load({
+ *                      ip:    "192.168.1.45",
+ *                      mac:   "62:e8:d4:12:f3:a9",
+ *                      name:  "Janes-Phone"
+ *                  })
  *              ]
  *          }
  *
@@ -36,18 +36,15 @@ export default class DeviceManager {
     constructor (options={}) {
         // Abstract class checks
         if (new.target === DeviceManager)
-            throw new TypeError("Unable to instantiate an abstract 'DeviceManager'.");
+            throw new TypeError(`Unable to instantiate an abstract '${new.target}'.`);
         if (this.getActiveDevices === undefined)
-            throw new TypeError("Derived class must override method 'getActiveDevices'");
+            throw new TypeError(`'${new.target}' must override method 'getActiveDevices'.`);
 
         options = Object.assign({
-            _module: path.basename(__filename, ".js"),
-            info: { timestamp : 0, devices : [] }
+            logger: Config.logger,
+            info:   { time: 0, devices: [] }
         }, options);
 
         Object.assign(this, options);
     }
-
-    // methods
-    get moduleName() { return this._module; }
 }

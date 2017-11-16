@@ -7,38 +7,58 @@ import Database from "Database";
  */
 
 const Device = {
-    ip:    "",
-    mac:   "",
-    name:  "",
+    ip:         "",
+    mac:        "",
+    name:       "",
+    firstSeen:  0,
+    lastSeen:   0,
 
-    exists: (key={ mac: Device.mac }) => {
-        return Database.then(db => {
-            return db.get("devices").find( key ).value() ? true : false;
-        });
+    isActive: () => {
     },
 
-    load: (key={ mac: Device.mac }) => {
+    setActive: (device={ mac: Device.mac }, state=true, time=(new Date()).getTime()) => {
         return Database.then(db => {
-            let dbDevice = db.get("devices").find( key ).value() || key;
-            return Object.assign({}, Device, dbDevice);
-        });
-    },
-
-    save: (key={ mac: Device.mac }) => {
-        return Database.then( db => {
-            let dbSearch = db.get("devices").find( key );
-
-            if ( dbSearch.value() ) {
-                return search.assign(Device).write();
+            if (state) {
+                return db.get("active")
+                    .push({ mac : device.mac, joinTime : time })
+                    .write();
             } else {
-                return db.get("devices").push(Device).write();
+                return db.get("active").remove({ mac : device.mac })
+                    .write();
             }
         });
     },
 
-    delete: (key={ mac: Device.mac }) => {
-        return Database.then( db => {
-            return db.get("devices").remove( key ).write();
+    exists: (device={ mac: Device.mac }) => {
+        return Database.then(db => {
+            return db.get("devices").find({ mac: device.mac }).value() ? true : false;
+        });
+    },
+
+    load: (device={ mac: Device.mac }) => {
+        return Database.then(db => {
+            let dbDevice = Object.assign(
+                (db.get("devices").find({ mac: device.mac }).value() || {}), device
+            );
+            return Object.assign({}, Device, dbDevice);
+        });
+    },
+
+    save: (device={ mac: Device.mac }) => {
+        return Database.then(db => {
+            let search = db.get("devices").find({ mac: device.mac });
+
+            if ( search.value() ) {
+                return search.assign(device).write();
+            } else {
+                return db.get("devices").push(device).write();
+            }
+        });
+    },
+
+    delete: (device={ mac: Device.mac }) => {
+        return Database.then(db => {
+            return db.get("devices").remove({ mac: device.mac }).write();
         });
     }
 };
