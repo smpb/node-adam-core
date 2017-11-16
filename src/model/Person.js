@@ -1,5 +1,4 @@
 import Database from "Database";
-import Device   from "model/Device";
 
 
 /*
@@ -14,16 +13,18 @@ const Person = {
     karma:     0,
     lastSeen:  0,
 
-    device() {
-        return Promise.resolve( Device().load({ mac: Person.device }) );
-    },
-
-    empathy(k, x) {
+    empathy: (k, x) => {
         if (x == 0) return x;
         return Math.round(k / (.1 * x));
     },
 
-    load: (key={}) => {
+    exists: (key={ email: Person.email }) => {
+        return Database.then(db => {
+            return db.get("people").find( key ).value() ? true : false;
+        });
+    },
+
+    load: (key={ email: Person.email }) => {
         return Database.then(db => {
             let dbPerson = db.get("people").find( key ).value() || key;
             return Object.assign({}, Person, dbPerson);

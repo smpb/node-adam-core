@@ -1,5 +1,4 @@
 import Database from "Database";
-import Person   from "model/Person";
 
 
 /*
@@ -12,11 +11,13 @@ const Device = {
     mac:   "",
     name:  "",
 
-    person() {
-        return Promise.resolve( Person().load({ device: Device.device }) );
+    exists: (key={ mac: Device.mac }) => {
+        return Database.then(db => {
+            return db.get("devices").find( key ).value() ? true : false;
+        });
     },
 
-    load: (key={}) => {
+    load: (key={ mac: Device.mac }) => {
         return Database.then(db => {
             let dbDevice = db.get("devices").find( key ).value() || key;
             return Object.assign({}, Device, dbDevice);
