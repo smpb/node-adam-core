@@ -19,24 +19,24 @@ const Person = {
         return Math.round(k / (.1 * x));
     },
 
-    exists: (person={ email: Person.email }) => {
+    exists: (person=Person, key={ email: person.email }) => {
         return Database.then(db => {
-            return db.get("people").find({ email: person.email }).value() ? true : false;
+            return db.get("people").find( key ).value() ? true : false;
         });
     },
 
-    load: (person={ email: Person.email }) => {
+    load: (person=Person, key={ email: person.email }) => {
         return Database.then(db => {
             let dbPerson = Object.assign(
-                (db.get("people").find({ email: person.email }).value() || {}), person
+                (db.get("people").find( key ).value() || {}), person
             );
             return Object.assign({}, Person, dbPerson);
         });
     },
 
-    save: (person={ email: Person.email }) => {
+    save: (person=Person, key={ email: person.email }) => {
         return Database.then(db => {
-            let search = db.get("people").find({ email: person.email });
+            let search = db.get("people").find( key );
 
             if ( search.value() ) {
                 return search.assign(person).write();
@@ -46,9 +46,9 @@ const Person = {
         });
     },
 
-    delete: (person={ email: Person.email }) => {
+    delete: (person=Person, key={ email: person.email }) => {
         return Database.then(db => {
-            return db.get("people").remove({ email: person.email }).write();
+            return db.get("people").remove( key ).write();
         });
     }
 };

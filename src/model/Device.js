@@ -16,7 +16,7 @@ const Device = {
     isActive: () => {
     },
 
-    setActive: (device={ mac: Device.mac }, state=true, time=(new Date()).getTime()) => {
+    setActive: (device=Device, state=true, time=(new Date()).getTime()) => {
         return Database.then(db => {
             if (state) {
                 return db.get("active")
@@ -29,24 +29,24 @@ const Device = {
         });
     },
 
-    exists: (device={ mac: Device.mac }) => {
+    exists: (device=Device, key={ mac: device.mac }) => {
         return Database.then(db => {
-            return db.get("devices").find({ mac: device.mac }).value() ? true : false;
+            return db.get("devices").find( key ).value() ? true : false;
         });
     },
 
-    load: (device={ mac: Device.mac }) => {
+    load: (device=Device, key={ mac: device.mac }) => {
         return Database.then(db => {
             let dbDevice = Object.assign(
-                (db.get("devices").find({ mac: device.mac }).value() || {}), device
+                (db.get("devices").find( key ).value() || {}), device
             );
             return Object.assign({}, Device, dbDevice);
         });
     },
 
-    save: (device={ mac: Device.mac }) => {
+    save: (device=Device, key={ mac: device.mac }) => {
         return Database.then(db => {
-            let search = db.get("devices").find({ mac: device.mac });
+            let search = db.get("devices").find( key );
 
             if ( search.value() ) {
                 return search.assign(device).write();
@@ -56,9 +56,9 @@ const Device = {
         });
     },
 
-    delete: (device={ mac: Device.mac }) => {
+    delete: (device=Device, key={ mac: device.mac }) => {
         return Database.then(db => {
-            return db.get("devices").remove({ mac: device.mac }).write();
+            return db.get("devices").remove( key ).write();
         });
     }
 };
