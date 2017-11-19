@@ -7,7 +7,8 @@ import Database from "Database";
  */
 
 const Person = {
-    name:       "",
+    firstName:  "",
+    lastName:   "",
     email:      "",
     device:     "",
     karma:      0,
