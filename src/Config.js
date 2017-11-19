@@ -45,12 +45,24 @@ env.production.manager  = {
 };
 
 
+// Telegram
+let telegram = {
+    token: "<TELEGRAM.ORG BOT KEY>",
+    trusted: [ 1 ]
+};
+
+// OpenWeatherMap
+let weather = {
+    token : "<OPENWEATHERMAP.ORG KEY>"
+};
+
 // Configuration object
 let config = {
     env:            key,
     port:           8080,
     logger:         winston,
-    weatherToken:   "<OPENWEATHERMAP.ORG KEY>",
+    telegram:       telegram,
+    weather:        weather,
     database:       env[key].database,
     heartbeat:      env[key].heartbeat,
     deviceManager:  env[key].manager

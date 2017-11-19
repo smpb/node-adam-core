@@ -24,7 +24,7 @@ export default class LocationWorker extends Worker {
                         location = res.data;
                         return owm.get("/weather", {
                             params : {
-                                APPID: Config.weatherToken,
+                                APPID: Config.weather.token,
                                 lat:   location.latitude,
                                 lon:   location.longitude,
                                 units: "metric"
