@@ -34,7 +34,7 @@ export default class LocationWorker extends Worker {
                     .then(res => {
                         weather = res.data;
                         return Database.then(db => {
-                            db.set("location", location).set("weather", weather).write();
+                            db.shortTerm.set("location", location).set("weather", weather).write();
                         })
                     })
                     .then(() => {

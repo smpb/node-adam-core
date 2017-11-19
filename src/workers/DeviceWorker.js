@@ -21,9 +21,9 @@ export default class DeviceWorker extends Worker {
                 ])
                 .then(values => {
                     let [db, data] = values;
-                    db.get("active").value().forEach(device => {
+                    db.shortTerm.get("active").value().forEach(device => {
                         if (! data.devices.find((d) => { return device.mac === d.mac; }) ) {
-                            let absentDevice = db.get("devices").find({mac : device.mac}).value();
+                            let absentDevice = db.longTerm.get("devices").find({mac : device.mac}).value();
                             this.emit("deviceDisconnected",
                                 { device : absentDevice, time : data.time }
                             );
@@ -31,7 +31,7 @@ export default class DeviceWorker extends Worker {
                     });
 
                     data.devices.forEach(device => {
-                        let known = db.get("devices").find({mac : device.mac}).value();
+                        let known = db.longTerm.get("devices").find({mac : device.mac}).value();
 
                         if (! known) {
                             this.emit("newDevice",
@@ -43,7 +43,7 @@ export default class DeviceWorker extends Worker {
                             );
                         }
 
-                        if (! db.get("active").find({ mac : device.mac}).value() ) {
+                        if (! db.shortTerm.get("active").find({ mac : device.mac}).value() ) {
                             this.emit("deviceConnected",
                                 { device : device, time : data.time }
                             );

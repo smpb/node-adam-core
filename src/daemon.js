@@ -66,12 +66,11 @@ deviceWorker.on("deviceDisconnected", (data) => {
 adam.use( bodyParser.json() );                          // to support JSON-encoded bodies
 adam.use( bodyParser.urlencoded({ extended: true }) );  // to support URL-encoded bodies
 
-
 // express routes
 adam.get("/", (req, res) => {
     Database
         .then(db => {
-            let bootTime = db.get("bootTime").value();
+            let bootTime = db.shortTerm.get("bootTime").value();
             let currentTime = Date.now();
             let elapsed = Math.round((currentTime - bootTime) / 1000);
 
@@ -83,7 +82,7 @@ adam.get("/", (req, res) => {
 adam.get("/devices", (req, res) => {
     Database
         .then(db => {
-            let devices = db.get("active").value();
+            let devices = db.shortTerm.get("active").value();
             res.json( devices );
         })
         .catch( error => { logger.error(`[ExpressJS] ${error}`); });

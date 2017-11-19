@@ -19,11 +19,11 @@ const Device = {
     setActive: (device=Device, state=true, time=(new Date()).getTime()) => {
         return Database.then(db => {
             if (state) {
-                return db.get("active")
+                return db.shortTerm.get("active")
                     .push({ mac : device.mac, joinTime : time })
                     .write();
             } else {
-                return db.get("active").remove({ mac : device.mac })
+                return db.shortTerm.get("active").remove({ mac : device.mac })
                     .write();
             }
         });
@@ -31,14 +31,14 @@ const Device = {
 
     exists: (device=Device, key={ mac: device.mac }) => {
         return Database.then(db => {
-            return db.get("devices").find( key ).value() ? true : false;
+            return db.longTerm.get("devices").find( key ).value() ? true : false;
         });
     },
 
     load: (device=Device, key={ mac: device.mac }) => {
         return Database.then(db => {
             let dbDevice = Object.assign(
-                (db.get("devices").find( key ).value() || {}), device
+                (db.longTerm.get("devices").find( key ).value() || {}), device
             );
             return Object.assign({}, Device, dbDevice);
         });
@@ -46,19 +46,19 @@ const Device = {
 
     save: (device=Device, key={ mac: device.mac }) => {
         return Database.then(db => {
-            let search = db.get("devices").find( key );
+            let search = db.longTerm.get("devices").find( key );
 
             if ( search.value() ) {
                 return search.assign(device).write();
             } else {
-                return db.get("devices").push(device).write();
+                return db.longTerm.get("devices").push(device).write();
             }
         });
     },
 
     delete: (device=Device, key={ mac: device.mac }) => {
         return Database.then(db => {
-            return db.get("devices").remove( key ).write();
+            return db.longTerm.get("devices").remove( key ).write();
         });
     }
 };

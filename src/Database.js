@@ -1,6 +1,7 @@
 import Config     from "Config";
 import lowDB      from "lowdb";
 import FileAsync  from "lowdb/adapters/FileAsync";
+import Memory     from "lowdb/adapters/Memory";
 
 
 /*
@@ -8,17 +9,25 @@ import FileAsync  from "lowdb/adapters/FileAsync";
  *
  */
 
-let database;
+let database = {};
 
-let dbPromise = lowDB(new FileAsync( Config.database ))
+let dbPromise = Promise.all([
+    lowDB(new Memory()),
+    lowDB(new FileAsync( Config.database )) ])
     .then(db => {
-        database = db;
-        return db.defaults({
+        database.shortTerm = db[0];
+        database.shortTerm
+            .set("active",   [])
+            .set("location", {})
+            .set("weather",  {})
+            .set("bootTime", Date.now())
+            .write();
+
+        database.longTerm = db[1];
+        return database.longTerm.defaults({
             people:   [],
             devices:  [],
-            location: {},
-            weather:  {}
-        }).set("active", []).set("bootTime", Date.now()).write();
+        }).write();
     })
     .then(() => {
         dbPromise = false;

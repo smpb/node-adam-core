@@ -21,14 +21,14 @@ const Person = {
 
     exists: (person=Person, key={ email: person.email }) => {
         return Database.then(db => {
-            return db.get("people").find( key ).value() ? true : false;
+            return db.longTerm.get("people").find( key ).value() ? true : false;
         });
     },
 
     load: (person=Person, key={ email: person.email }) => {
         return Database.then(db => {
             let dbPerson = Object.assign(
-                (db.get("people").find( key ).value() || {}), person
+                (db.longTerm.get("people").find( key ).value() || {}), person
             );
             return Object.assign({}, Person, dbPerson);
         });
@@ -36,19 +36,19 @@ const Person = {
 
     save: (person=Person, key={ email: person.email }) => {
         return Database.then(db => {
-            let search = db.get("people").find( key );
+            let search = db.longTerm.get("people").find( key );
 
             if ( search.value() ) {
                 return search.assign(person).write();
             } else {
-                return db.get("people").push(person).write();
+                return db.longTerm.get("people").push(person).write();
             }
         });
     },
 
     delete: (person=Person, key={ email: person.email }) => {
         return Database.then(db => {
-            return db.get("people").remove( key ).write();
+            return db.longTerm.get("people").remove( key ).write();
         });
     }
 };
