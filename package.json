@@ -19,7 +19,7 @@
         "home assistant"
     ],
     "scripts": {
-        "clean": "rm -rf dist database node_modules",
+        "clean": "rm -rf dist node_modules",
         "validate": "eslint src/*.js",
         "transpile": "rm -rf dist && mkdir dist && babel src -d dist",
         "build": "eslint src/*.js && rm -rf dist && mkdir -p dist database && babel src -d dist",
