@@ -1,3 +1,5 @@
+![ADAM](https://static.sergiobernardino.net/images/adam_128_by_alphagravy.gif)
+
 # A.D.A.M.
 
 ![node version](https://img.shields.io/badge/node-%3E%3D6.9.0-green.svg) [![license](https://img.shields.io/badge/license-MIT%20License-blue.svg)](https://github.com/smpb/node-adam-core/blob/master/LICENSE)
