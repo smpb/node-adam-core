@@ -17,7 +17,8 @@ let dbPromise = Promise.all([
     .then(db => {
         database.shortTerm = db[0];
         database.shortTerm
-            .set("active",   [])
+            .set("network",  [])
+            .set("denizens", [])
             .set("location", {})
             .set("weather",  {})
             .set("bootTime", Date.now())

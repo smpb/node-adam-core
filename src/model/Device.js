@@ -13,22 +13,6 @@ const Device = {
     firstSeen:  0,
     lastSeen:   0,
 
-    isActive: () => {
-    },
-
-    setActive: (device=Device, state=true, time=(new Date()).getTime()) => {
-        return Database.then(db => {
-            if (state) {
-                return db.shortTerm.get("active")
-                    .push({ mac : device.mac, joinTime : time })
-                    .write();
-            } else {
-                return db.shortTerm.get("active").remove({ mac : device.mac })
-                    .write();
-            }
-        });
-    },
-
     exists: (device=Device, key={ mac: device.mac }) => {
         return Database.then(db => {
             return db.longTerm.get("devices").find( key ).value() ? true : false;

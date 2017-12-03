@@ -1,6 +1,8 @@
-import Config    from "Config";
-import Worker    from "Worker";
-import Database  from "Database";
+import Config  from "Config";
+import Worker  from "Worker";
+import Device  from "model/Device";
+import Home    from "model/Home";
+
 
 /*
  * Network devices worker
@@ -16,38 +18,44 @@ export default class DeviceWorker extends Worker {
             heartbeat: Config.heartbeat,
             action: () => {
                 Promise.all([
-                    Database,
+                    Home.getConnectedDevices(),
                     manager.getActiveDevices()
                 ])
                 .then(values => {
-                    let [db, data] = values;
-                    db.shortTerm.get("active").value().forEach(device => {
-                        if (! data.devices.find((d) => { return device.mac === d.mac; }) ) {
-                            let absentDevice = db.longTerm.get("devices").find({mac : device.mac}).value();
-                            this.emit("deviceDisconnected",
-                                { device : absentDevice, time : data.time }
-                            );
+                    let [activeDevices, managerData] = values;
+                    activeDevices.forEach(device => {
+                        if (! managerData.devices.find(d => { return device.mac === d.mac; }) ) {
+                            Device.load(device)
+                                .then(absentDevice => {
+                                    this.emit("deviceDisconnected",
+                                        { device : absentDevice, time : managerData.time }
+                                    );
+                                });
                         }
                     });
 
-                    data.devices.forEach(device => {
-                        let known = db.longTerm.get("devices").find({mac : device.mac}).value();
+                    managerData.devices.forEach(device => {
+                        Device.exists(device)
+                            .then(known => {
+                                if (! known) {
+                                    this.emit("newDevice",
+                                        { device : device, time : managerData.time }
+                                    );
+                                } else {
+                                    this.emit("deviceHeartbeat",
+                                        { device : device, time : managerData.time }
+                                    );
+                                }
+                            });
 
-                        if (! known) {
-                            this.emit("newDevice",
-                                { device : device, time : data.time }
-                            );
-                        } else {
-                            this.emit("deviceHeartbeat",
-                                { device : device, time : data.time }
-                            );
-                        }
-
-                        if (! db.shortTerm.get("active").find({ mac : device.mac}).value() ) {
-                            this.emit("deviceConnected",
-                                { device : device, time : data.time }
-                            );
-                        }
+                        Home.isDeviceConnected(device)
+                            .then(connected => {
+                                if (! connected ) {
+                                    this.emit("deviceConnected",
+                                        { device : device, time : managerData.time }
+                                    );
+                                }
+                            });
                     });
                 })
                 .catch( error => { this.emit("error", error); });

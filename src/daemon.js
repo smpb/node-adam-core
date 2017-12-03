@@ -1,6 +1,7 @@
 import Config          from "Config";
 import Database        from "Database";
 import Device          from "model/Device";
+import Home            from "model/Home";
 import DeviceWorker    from "workers/DeviceWorker";
 import LocationWorker  from "workers/LocationWorker";
 import DemoManager     from "managers/DemoManager";
@@ -47,14 +48,14 @@ deviceWorker.on("deviceHeartbeat", (data) => {
         .catch( error => { logger.error(`[${deviceWorker.name}] ${error}`); });
 });
 deviceWorker.on("deviceConnected", (data) => {
-    Device.setActive(data.device, true, data.time)
+    Home.deviceConnected(data.device, data.time)
         .then(() => {
             logger.info(`[${deviceWorker.name}] Device [${data.device.mac} / ${data.device.name}] has JOINED the network.`);
         })
         .catch( error => { logger.error(`[${deviceWorker.name}] ${error}`); });
 });
 deviceWorker.on("deviceDisconnected", (data) => {
-    Device.setActive(data.device, false)
+    Home.deviceDisconnected(data.device)
         .then(() => {
             logger.info(`[${deviceWorker.name}] Device [${data.device.mac} / ${data.device.name}] has LEFT the network.`);
         })
@@ -80,9 +81,8 @@ adam.get("/", (req, res) => {
 });
 
 adam.get("/devices", (req, res) => {
-    Database
-        .then(db => {
-            let devices = db.shortTerm.get("active").value();
+    Home.getConnectedDevices()
+        .then(devices => {
             res.json( devices );
         })
         .catch( error => { logger.error(`[ExpressJS] ${error}`); });
