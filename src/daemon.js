@@ -1,7 +1,8 @@
 import Config          from "Config";
 import Database        from "Database";
-import Device          from "model/Device";
 import Home            from "model/Home";
+import Device          from "model/Device";
+import Person          from "model/Person";
 import DeviceWorker    from "workers/DeviceWorker";
 import LocationWorker  from "workers/LocationWorker";
 import DemoManager     from "managers/DemoManager";
@@ -37,11 +38,9 @@ deviceWorker.on("newDevice", (data) => {
         .catch( error => { logger.error(`[${deviceWorker.name}] ${error}`); });
 });
 deviceWorker.on("deviceHeartbeat", (data) => {
-    Device.load({ mac: data.device.mac })
-        .then(device => {
-            device.lastSeen = data.time;
-            return Device.save(device);
-        })
+    data.device.lastSeen = data.time;
+
+    Device.save(data.device)
         .then(() => {
             logger.debug(`[${deviceWorker.name}] Device [${data.device.mac} / ${data.device.name}] has IP '${data.device.ip}'.`);
         })
@@ -61,7 +60,30 @@ deviceWorker.on("deviceDisconnected", (data) => {
         })
         .catch( error => { logger.error(`[${deviceWorker.name}] ${error}`); });
 });
+deviceWorker.on("personHeartbeat", (data) => {
+    data.person.lastSeen = data.time;
 
+    Person.save(data.person)
+        .then(() => {
+            logger.debug(`[${deviceWorker.name}] Person ${data.person.firstName} ${data.person.lastName} is still at Home.`);
+        })
+        .catch( error => { logger.error(`[${deviceWorker.name}] ${error}`); });
+});
+deviceWorker.on("personEntered", (data) => {
+    Home.personEntered(data.person)
+        .then(() => {
+            logger.info(`[${deviceWorker.name}] Person ${data.person.firstName} ${data.person.lastName} has entered Home.`);
+        })
+        .catch( error => { logger.error(`[${deviceWorker.name}] ${error}`); });
+});
+deviceWorker.on("personExited", (data) => {
+    Home.personExited(data.person)
+        .then(() => {
+            logger.info(`[${deviceWorker.name}] Person ${data.person.firstName} ${data.person.lastName} has exited Home.`);
+        })
+        .catch( error => { logger.error(`[${deviceWorker.name}] ${error}`); });
+
+});
 
 // express setup
 adam.use( bodyParser.json() );                          // to support JSON-encoded bodies

@@ -1,7 +1,8 @@
 import Config  from "Config";
 import Worker  from "Worker";
-import Device  from "model/Device";
 import Home    from "model/Home";
+import Device  from "model/Device";
+import Person  from "model/Person";
 
 
 /*
@@ -25,37 +26,65 @@ export default class DeviceWorker extends Worker {
                     let [activeDevices, managerData] = values;
                     activeDevices.forEach(device => {
                         if (! managerData.devices.find(d => { return device.mac === d.mac; }) ) {
-                            Device.load(device)
-                                .then(absentDevice => {
-                                    this.emit("deviceDisconnected",
-                                        { device : absentDevice, time : managerData.time }
+                            Promise.all([
+                                Device.load(device),
+                                Person.exists({ device: device.mac })
+                            ])
+                            .then(values => {
+                                let [absentDevice, person] = values;
+
+                                this.emit("deviceDisconnected",
+                                    { device : absentDevice, time : managerData.time }
+                                );
+
+                                if ( person ) {
+                                    this.emit("personExited",
+                                        { person : person, time : managerData.time }
                                     );
-                                });
+                                }
+                            });
+
                         }
                     });
 
                     managerData.devices.forEach(device => {
-                        Device.exists(device)
-                            .then(known => {
-                                if (! known) {
-                                    this.emit("newDevice",
-                                        { device : device, time : managerData.time }
+                        Promise.all([
+                            Device.exists({ mac: device.mac }),
+                            Home.isDeviceConnected({ mac: device.mac }),
+                            Person.exists({ device: device.mac })
+                        ])
+                        .then(values => {
+                            let [known, connected, person] = values;
+
+                            if (! known) {
+                                this.emit("newDevice",
+                                    { device : device, time : managerData.time }
+                                );
+                            } else {
+                                this.emit("deviceHeartbeat",
+                                    { device : device, time : managerData.time }
+                                );
+                            }
+
+                            if (! connected ) {
+                                this.emit("deviceConnected",
+                                    { device : device, time : managerData.time }
+                                );
+                            }
+
+                            if ( person ) {
+                                if (! connected) {
+                                    this.emit("personEntered",
+                                        { person : person, time : managerData.time }
                                     );
                                 } else {
-                                    this.emit("deviceHeartbeat",
-                                        { device : device, time : managerData.time }
+                                    this.emit("personHeartbeat",
+                                        { person : person, time : managerData.time }
                                     );
                                 }
-                            });
+                            }
+                        });
 
-                        Home.isDeviceConnected(device)
-                            .then(connected => {
-                                if (! connected ) {
-                                    this.emit("deviceConnected",
-                                        { device : device, time : managerData.time }
-                                    );
-                                }
-                            });
                     });
                 })
                 .catch( error => { this.emit("error", error); });
