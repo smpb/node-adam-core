@@ -20,9 +20,10 @@ const Person = {
         return Math.round(k / (.1 * x));
     },
 
-    exists: (person=Person, key={ email: person.email }) => {
+    exists: (key={ email: person.email }) => {
         return Database.then(db => {
-            return db.longTerm.get("people").find( key ).value() ? true : false;
+            let found = db.longTerm.get("people").find( key ).value();
+            return found ? found : false;
         });
     },
 

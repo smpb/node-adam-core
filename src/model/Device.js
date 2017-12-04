@@ -13,9 +13,10 @@ const Device = {
     firstSeen:  0,
     lastSeen:   0,
 
-    exists: (device=Device, key={ mac: device.mac }) => {
+    exists: (key={ mac: device.mac }) => {
         return Database.then(db => {
-            return db.longTerm.get("devices").find( key ).value() ? true : false;
+            let found = db.longTerm.get("devices").find( key ).value();
+            return found ? found : false;
         });
     },
 
