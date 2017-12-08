@@ -14,6 +14,7 @@ const Person = {
     karma:      0,
     firstSeen:  0,
     lastSeen:   0,
+    trusted:    false,
 
     empathy: (k, x) => {
         if (x == 0) return x;
@@ -41,9 +42,11 @@ const Person = {
             let search = db.longTerm.get("people").find( key );
 
             if ( search.value() ) {
-                return search.assign(person).write();
+                return search.assign(person).write()
+                    .then(() => { return person });
             } else {
-                return db.longTerm.get("people").push(person).write();
+                return db.longTerm.get("people").push(person).write()
+                    .then(() => { return person });
             }
         });
     },

@@ -1,4 +1,5 @@
-import Database from "Database";
+import Database  from "Database";
+import Person    from "model/Person";
 
 
 /*
@@ -15,7 +16,7 @@ const Home = {
 
                 if (! inside) {
                     return db.shortTerm.get("denizens")
-                        .push({ person : person.email, enterTime : time })
+                        .push({ email : person.email, enterTime : time })
                         .write();
                 }
     });
@@ -24,14 +25,17 @@ const Home = {
     personExited: (person, time=(new Date()).getTime()) => {
         return Database.then(db => {
             return db.shortTerm.get("denizens")
-                .remove({ person : person.email })
+                .remove({ email : person.email })
                 .write();
         });
     },
 
     getPeopleInside: () => {
         return Database.then(db => {
-            return db.shortTerm.get("denizens").value();
+            let peopleKeys = db.shortTerm.get("denizens").value();
+
+            return Promise.all( peopleKeys.map(k => { return Person.load({ email : k.email }); }) )
+                .then(people => { return people });
         });
     },
 

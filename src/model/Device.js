@@ -34,9 +34,11 @@ const Device = {
             let search = db.longTerm.get("devices").find( key );
 
             if ( search.value() ) {
-                return search.assign(device).write();
+                return search.assign(device).write()
+                    .then(() => { return device });
             } else {
-                return db.longTerm.get("devices").push(device).write();
+                return db.longTerm.get("devices").push(device).write()
+                    .then(() => { return device });
             }
         });
     },
